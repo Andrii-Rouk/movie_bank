@@ -1,7 +1,14 @@
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .sidebar-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 14px;
+  color: var(--text-primary);
 }
 
 .movie-list {
@@ -20,18 +27,22 @@
   transition: background-color 0.2s;
 }
 
-.movie-card:hover,
-.movie-card.active {
-  background-color: var(--bg-hover);
+.movie-card:hover {
+  background-color: var(--bg-secondary);
 }
 
-.movie-card-thumb {
-  width: 160px;
-  height: 90px;
-  flex-shrink: 0;
+.movie-card.active {
+  background-color: var(--bg-hover);
+  outline: 1px solid #3ea6ff;
+}
+
+.movie-thumb {
+  width: 140px;
+  height: 80px;
   object-fit: cover;
   border-radius: 8px;
-  background-color: var(--bg-secondary);
+  background-color: #222;
+  flex-shrink: 0;
 }
 
 .movie-card-info {
@@ -39,12 +50,14 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .movie-card-title {
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -57,9 +70,8 @@
 }
 
 .load-more-btn {
-  width: 100%;
-  margin-top: 16px;
-  padding: 10px;
+  margin-top: 8px;
+  padding: 12px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
@@ -72,4 +84,20 @@
 
 .load-more-btn:hover {
   background-color: var(--bg-hover);
+}
+
+.load-more-btn.is-hidden {
+  display: none;
+}
+
+/* Адаптив списку фільмів на смартфоні */
+@media (max-width: 540px) {
+  .movie-thumb {
+    width: 120px;
+    height: 70px;
+  }
+
+  .movie-card-title {
+    font-size: 13px;
+  }
 }
