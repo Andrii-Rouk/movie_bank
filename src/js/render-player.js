@@ -7,7 +7,7 @@ const MOVIE_SOURCES = {
   },
   src2: {
     label: '🍿 Плеєр 2 (Резерв)',
-    getUrl: id => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    getUrl: id => `https://vidlink.pro/movie/${id}`,
   },
   src3: {
     label: '🍿 Плеєр 3 (Резерв 2)',
@@ -52,7 +52,8 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
       <iframe
         src="${activeSource.getUrl(movie.id)}"
         title="${movie.title}"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+        allow="autoplay; fullscreen; picture-in-picture"
+        referrerpolicy="origin"
         allowfullscreen
       ></iframe>
     `;
