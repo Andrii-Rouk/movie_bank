@@ -1,4 +1,4 @@
-import { getReleaseYear } from './helpers.js';
+import { getReleaseYear, getActorPhotoUrl } from './helpers.js';
 
 const MOVIE_SOURCES = {
   src1: {
@@ -15,7 +15,13 @@ const MOVIE_SOURCES = {
   },
 };
 
-export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
+export function renderPlayer(
+  container,
+  movie,
+  trailerKey,
+  mode = 'trailer',
+  cast = []
+) {
   if (!movie) {
     container.innerHTML =
       '<div class="player-placeholder">Фільм не обрано</div>';
@@ -76,6 +82,33 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
     )
     .join('');
 
+  const castMarkup =
+    cast && cast.length > 0
+      ? `
+      <div class="movie-cast">
+        <h3 class="cast-title">У головних ролях</h3>
+        <ul class="cast-list">
+          ${cast
+            .map(
+              actor => `
+              <li class="cast-card">
+                <img
+                  src="${getActorPhotoUrl(actor.profile_path)}"
+                  alt="${actor.name}"
+                  class="cast-photo"
+                  loading="lazy"
+                />
+                <span class="cast-name">${actor.name}</span>
+                ${actor.character ? `<span class="cast-character">${actor.character}</span>` : ''}
+              </li>
+            `
+            )
+            .join('')}
+        </ul>
+      </div>
+    `
+      : '';
+
   container.innerHTML = `
     <div class="video-wrapper">
       ${iframeMarkup}
@@ -111,6 +144,7 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
         <span>Оригінал: ${movie.original_title}</span>
       </div>
       <p class="movie-overview">${overview}</p>
+      ${castMarkup}
     </div>
   `;
 }

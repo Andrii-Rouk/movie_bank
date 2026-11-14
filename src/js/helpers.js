@@ -9,6 +9,12 @@ export function getBackdropUrl(path) {
     : 'https://placehold.co/320x180/1e1e1e/aaaaaa?text=No+Preview';
 }
 
+export function getActorPhotoUrl(path) {
+  return path
+    ? `${IMAGE_BASE_URL}/w185${path}`
+    : 'https://placehold.co/185x278/272727/aaaaaa?text=No+Photo';
+}
+
 export function getReleaseYear(releaseDate) {
   return releaseDate ? releaseDate.slice(0, 4) : 'Н/Д';
 }

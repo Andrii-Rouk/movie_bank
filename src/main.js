@@ -9,6 +9,17 @@ import { renderPlayer } from './js/render-player.js';
 import { renderSidebarList } from './js/render-sidebar.js';
 import { showError, showInfo } from './js/helpers.js';
 
+const TMDB_API_KEY = '41051303f327246273452580f561c1a9';
+
+async function fetchMovieCredits(movieId) {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=uk-UA`
+  );
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.cast ? data.cast.slice(0, 8) : [];
+}
+
 const refs = {
   searchForm: document.getElementById('search-form'),
   genreSelect: document.getElementById('genre-select'),
@@ -26,6 +37,7 @@ const state = {
   movies: [],
   activeMovie: null,
   activeTrailerKey: null,
+  activeCast: [],
   playerMode: 'trailer',
   currentQuery: '',
   genre: '',
@@ -64,20 +76,29 @@ async function initFilters() {
 async function selectMovie(movie) {
   state.activeMovie = movie;
   state.playerMode = 'trailer';
+  state.activeCast = [];
 
   renderSidebarList(refs.movieList, state.movies, movie.id, false);
 
   try {
-    state.activeTrailerKey = await fetchMovieTrailer(movie.id);
+    const [trailerKey, cast] = await Promise.all([
+      fetchMovieTrailer(movie.id),
+      fetchMovieCredits(movie.id).catch(() => []),
+    ]);
+
+    state.activeTrailerKey = trailerKey;
+    state.activeCast = cast;
+
     renderPlayer(
       refs.playerContainer,
       movie,
       state.activeTrailerKey,
-      state.playerMode
+      state.playerMode,
+      state.activeCast
     );
   } catch (error) {
     showError('Не вдалося завантажити відео для цього фільму.');
-    renderPlayer(refs.playerContainer, movie, null, state.playerMode);
+    renderPlayer(refs.playerContainer, movie, null, state.playerMode, []);
   }
 }
 
@@ -255,7 +276,8 @@ refs.playerContainer.addEventListener('click', e => {
       refs.playerContainer,
       state.activeMovie,
       state.activeTrailerKey,
-      state.playerMode
+      state.playerMode,
+      state.activeCast
     );
   }
 });
