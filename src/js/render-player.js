@@ -3,15 +3,15 @@ import { getReleaseYear } from './helpers.js';
 const MOVIE_SOURCES = {
   src1: {
     label: '🍿 Плеєр 1 (Основний)',
-    getUrl: id => `https://www.2embed.cc/embed/${id}`,
+    getUrl: id => `https://vidlink.pro/movie/${id}`,
   },
   src2: {
     label: '🍿 Плеєр 2 (Резерв)',
-    getUrl: id => `https://vidlink.pro/movie/${id}`,
+    getUrl: id => `https://autoembed.co/movie/tmdb/${id}`,
   },
   src3: {
     label: '🍿 Плеєр 3 (Резерв 2)',
-    getUrl: id => `https://autoembed.co/movie/tmdb/${id}`,
+    getUrl: id => `https://www.2embed.cc/embed/${id}`,
   },
 };
 
