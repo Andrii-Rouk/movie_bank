@@ -3,12 +3,16 @@
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  position: sticky;
+  top: 84px;
+  max-height: calc(100vh - 104px);
 }
 
 .sidebar-title {
   font-size: 16px;
   font-weight: 600;
   color: #f1f1f1;
+  flex-shrink: 0;
 }
 
 .movie-list {
@@ -16,8 +20,29 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0;
+  padding: 2px 6px 2px 2px;
   margin: 0;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #383838 transparent;
+}
+
+.movie-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.movie-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.movie-list::-webkit-scrollbar-thumb {
+  background-color: #383838;
+  border-radius: 6px;
+}
+
+.movie-list::-webkit-scrollbar-thumb:hover {
+  background-color: #555555;
 }
 
 .movie-card {
@@ -83,7 +108,7 @@
 }
 
 .load-more-btn {
-  margin-top: 8px;
+  margin-top: 4px;
   padding: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -92,6 +117,7 @@
   border: 1px solid #303030;
   border-radius: 20px;
   cursor: pointer;
+  flex-shrink: 0;
   transition: background-color 0.2s;
 }
 
@@ -101,6 +127,18 @@
 
 .load-more-btn.is-hidden {
   display: none;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-section {
+    position: static;
+    max-height: none;
+  }
+
+  .movie-list {
+    overflow-y: visible;
+    padding: 0;
+  }
 }
 
 @media (max-width: 640px) {
