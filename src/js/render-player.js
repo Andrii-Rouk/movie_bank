@@ -26,6 +26,9 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : '—';
   const overview =
     movie.overview || 'Опис для цього фільму українською мовою поки відсутній.';
+  const searchQuery = encodeURIComponent(
+    `${movie.title} ${year !== 'Н/Д' ? year : ''} дивитися онлайн українською`.trim()
+  );
 
   let iframeMarkup = '';
 
@@ -88,6 +91,15 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
           🎬 Трейлер
         </button>
         ${sourceButtonsMarkup}
+        <a
+          href="https://www.google.com/search?q=${searchQuery}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mode-btn"
+          style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;"
+        >
+          🔍 Знайти онлайн
+        </a>
       </div>
     </div>
 
