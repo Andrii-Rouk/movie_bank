@@ -4,21 +4,11 @@ import {
   discoverMovies,
   searchMovies,
   fetchMovieTrailer,
+  fetchMovieCredits,
 } from './api/tmdb-api.js';
 import { renderPlayer } from './js/render-player.js';
 import { renderSidebarList } from './js/render-sidebar.js';
 import { showError, showInfo } from './js/helpers.js';
-
-const TMDB_API_KEY = '41051303f327246273452580f561c1a9';
-
-async function fetchMovieCredits(movieId) {
-  const res = await fetch(
-    `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${TMDB_API_KEY}&language=uk-UA`
-  );
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.cast ? data.cast.slice(0, 8) : [];
-}
 
 const refs = {
   searchForm: document.getElementById('search-form'),

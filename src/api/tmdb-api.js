@@ -75,3 +75,8 @@ export async function fetchMovieTrailer(movieId) {
 
   return trailer ? trailer.key : null;
 }
+
+export async function fetchMovieCredits(movieId) {
+  const { data } = await tmdbClient.get(`/movie/${movieId}/credits`);
+  return data.cast ? data.cast.slice(0, 8) : [];
+}
