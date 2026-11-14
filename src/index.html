@@ -1,14 +1,181 @@
 <!DOCTYPE html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GoIT · Домашнє завдання</title>
-    <link rel="stylesheet" href="./css/styles.css" />
-  </head>
-  <body>
-    <!-- Розмітку додавай тут за технічним завданням -->
 
-    <script type="module" src="./main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovieBank — Онлайн кінотеатр</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="container header-container">
+      <!-- Зліва: логотип Rouk&Company -->
+      <a href="./index.html" class="studio-logo">
+        <img src="./assets/rouk-company-logo.png" alt="Rouk&Company" class="header-logo-img" />
+        <div class="studio-text-group">
+          <span class="studio-name">Rouk<span>&amp;</span><span class="gold">Company</span></span>
+          <span class="studio-tagline">Media Studio</span>
+        </div>
+      </a>
+
+      <!-- По центру: пошук -->
+      <form class="search-form" id="search-form">
+        <input type="text" name="searchQuery" class="search-input" placeholder="Пошук фільмів за назвою..."
+          autocomplete="off" />
+        <button type="submit" class="search-btn">Пошук</button>
+      </form>
+
+      <!-- Справа: MovieBank -->
+      <a href="./index.html" class="logo">
+        <span class="logo-icon">▶</span>
+        <span class="logo-text">Movie<span class="logo-accent">Bank</span></span>
+      </a>
+    </div>
+  </header>
+  <main class="main">
+    <div class="container">
+      <!-- Панель фільтрів -->
+      <section class="filters-bar" id="filters-bar">
+        <select class="filter-select" id="genre-select" aria-label="Категорія">
+          <option value="">Усі категорії</option>
+        </select>
+
+        <select class="filter-select" id="year-select" aria-label="Рік випуску">
+          <option value="">Усі роки</option>
+        </select>
+
+        <select class="filter-select" id="country-select" aria-label="Країна виробник">
+          <option value="">Усі країни</option>
+          <option value="UA">🇺🇦 Україна</option>
+          <option value="US">🇺🇸 США</option>
+          <option value="GB">🇬🇧 Велика Британія</option>
+          <option value="PL">🇵🇱 Польща</option>
+          <option value="FR">🇫🇷 Франція</option>
+          <option value="DE">🇩🇪 Німеччина</option>
+          <option value="CA">🇨🇦 Канада</option>
+          <option value="KR">🇰🇷 Південна Корея</option>
+          <option value="JP">🇯🇵 Японія</option>
+        </select>
+
+        <select class="filter-select" id="lang-select" aria-label="Мова оригіналу">
+          <option value="">Усі мови</option>
+          <option value="uk">🇺🇦 Українська (мова)</option>
+          <option value="en">🇺🇸 Англійська</option>
+          <option value="pl">🇵🇱 Польська</option>
+          <option value="fr">🇫🇷 Французька</option>
+          <option value="de">🇩🇪 Німецька</option>
+          <option value="ko">🇰🇷 Корейська</option>
+          <option value="ja">🇯🇵 Японська</option>
+        </select>
+
+        <button type="button" class="reset-filters-btn" id="reset-filters-btn">
+          Скинути фільтри
+        </button>
+      </section>
+
+      <div class="main-layout">
+        <!-- Ліва колонка: Плеєр та опис -->
+        <section class="player-section" id="player-container">
+          <div class="player-placeholder">Завантаження плеєра...</div>
+        </section>
+
+        <!-- Права колонка: Стрічка фільмів як у YouTube -->
+        <aside class="sidebar-section">
+          <h2 class="sidebar-title" id="sidebar-title">Популярні фільми</h2>
+          <ul class="movie-list" id="movie-list"></ul>
+          <button type="button" class="load-more-btn is-hidden" id="load-more-btn">
+            Завантажити ще
+          </button>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Футер проєкту -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <!-- Колонка 1: Брендинг Rouk&Company -->
+        <div class="footer-brand">
+          <a href="./index.html" class="footer-logo-link">
+            <img src="./assets/rouk-company-logo.png" alt="Rouk&Company" class="footer-logo-img" />
+            <div class="footer-company-name">
+              Rouk<span>&amp;</span><span class="gold">Company</span>
+            </div>
+          </a>
+          <p class="footer-description">
+            Digital Media &amp; Streaming Solutions. Створюємо сучасні та зручні вебплатформи для поціновувачів якісного
+            кінематографу.
+          </p>
+          <div class="footer-status">
+            <span class="status-dot"></span>
+            <span>Streaming Servers: Online</span>
+          </div>
+        </div>
+
+        <!-- Колонка 2: Контакти англійською -->
+        <div class="footer-nav-col footer-contacts">
+          <h3>Contact Us</h3>
+          <ul class="contact-list">
+            <li class="contact-item">
+              <span class="contact-icon">📍</span>
+              <a href="https://maps.google.com/?q=Demydivka,+Rivne+Oblast,+Ukraine,+35200" target="_blank"
+                rel="noopener noreferrer">
+                35200, Demydivka, Rivne Oblast, Ukraine
+              </a>
+            </li>
+            <li class="contact-item">
+              <span class="contact-icon">📞</span>
+              <a href="tel:+380673019367">+38 (067) 301-93-67</a>
+            </li>
+            <li class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <a href="mailto:office@rouk-company.ua">office@rouk-company.ua</a>
+            </li>
+            <li class="contact-item">
+              <span class="contact-icon">🕒</span>
+              <span>Mon – Fri: 09:00 – 18:00 (EET)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Колонка 3: Навігація та соцмережі -->
+        <div class="footer-nav-col">
+          <h3>Platform</h3>
+          <ul class="footer-links">
+            <li><a href="./index.html">Trending Movies</a></li>
+            <li><a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB Database</a></li>
+            <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+          </ul>
+
+          <div class="social-links" aria-label="Social Media">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="social-btn"
+              title="GitHub">GH</a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="social-btn" title="Telegram">TG</a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="social-btn"
+              title="YouTube">YT</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Нижня частина футера -->
+      <div class="footer-bottom">
+        <p class="copyright">&copy; 2026 Rouk&amp;Company. All rights reserved.</p>
+        <p class="footer-credits">
+          Powered by
+          <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB</a>.
+          Crafted with 💙💛 in Ukraine.
+        </p>
+        <button type="button" class="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+          Back to top ↑
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+
 </html>
