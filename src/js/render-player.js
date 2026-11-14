@@ -52,6 +52,7 @@ export function renderPlayer(container, movie, trailerKey, mode = 'trailer') {
       <iframe
         src="${activeSource.getUrl(movie.id)}"
         title="${movie.title}"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         allowfullscreen
       ></iframe>
     `;
