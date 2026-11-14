@@ -86,12 +86,18 @@ export function renderPlayer(
     cast && cast.length > 0
       ? `
       <div class="movie-cast">
-        <h3 class="cast-title">У головних ролях</h3>
+        <h3 class="cast-title">У головних ролях <span class="cast-hint">(натисніть на актора, щоб побачити його фільми)</span></h3>
         <ul class="cast-list">
           ${cast
+            .slice(0, 5)
             .map(
               actor => `
-              <li class="cast-card">
+              <li
+                class="cast-card"
+                data-actor-id="${actor.id}"
+                data-actor-name="${actor.name}"
+                title="Фільми з ${actor.name}"
+              >
                 <img
                   src="${getActorPhotoUrl(actor.profile_path)}"
                   alt="${actor.name}"

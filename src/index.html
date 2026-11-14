@@ -34,41 +34,80 @@
       </a>
     </div>
   </header>
+
   <main class="main">
     <div class="container">
-      <!-- Панель фільтрів -->
+      <!-- Панель мульти-фільтрів з чекбоксами -->
       <section class="filters-bar" id="filters-bar">
-        <select class="filter-select" id="genre-select" aria-label="Категорія">
-          <option value="">Усі категорії</option>
-        </select>
+        <div class="multi-filter" data-filter="genre">
+          <button type="button" class="filter-toggle-btn" id="genre-toggle">
+            <span class="filter-btn-label" data-default="Усі категорії">Усі категорії</span>
+            <span class="filter-arrow">▾</span>
+          </button>
+          <div class="filter-dropdown" id="genre-dropdown"></div>
+        </div>
 
-        <select class="filter-select" id="year-select" aria-label="Рік випуску">
-          <option value="">Усі роки</option>
-        </select>
+        <div class="multi-filter" data-filter="year">
+          <button type="button" class="filter-toggle-btn" id="year-toggle">
+            <span class="filter-btn-label" data-default="Усі роки">Усі роки</span>
+            <span class="filter-arrow">▾</span>
+          </button>
+          <div class="filter-dropdown" id="year-dropdown"></div>
+        </div>
 
-        <select class="filter-select" id="country-select" aria-label="Країна виробник">
-          <option value="">Усі країни</option>
-          <option value="UA">🇺🇦 Україна</option>
-          <option value="US">🇺🇸 США</option>
-          <option value="GB">🇬🇧 Велика Британія</option>
-          <option value="PL">🇵🇱 Польща</option>
-          <option value="FR">🇫🇷 Франція</option>
-          <option value="DE">🇩🇪 Німеччина</option>
-          <option value="CA">🇨🇦 Канада</option>
-          <option value="KR">🇰🇷 Південна Корея</option>
-          <option value="JP">🇯🇵 Японія</option>
-        </select>
+        <div class="multi-filter" data-filter="country">
+          <button type="button" class="filter-toggle-btn" id="country-toggle">
+            <span class="filter-btn-label" data-default="Усі країни">Усі країни</span>
+            <span class="filter-arrow">▾</span>
+          </button>
+          <div class="filter-dropdown" id="country-dropdown">
+            <label class="filter-option"><input type="checkbox" value="UA" data-text="🇺🇦 Україна" /><span>🇺🇦
+                Україна</span></label>
+            <label class="filter-option"><input type="checkbox" value="US" data-text="🇺🇸 США" /><span>🇺🇸
+                США</span></label>
+            <label class="filter-option"><input type="checkbox" value="GB" data-text="🇬🇧 Велика Британія" /><span>🇬🇧
+                Велика Британія</span></label>
+            <label class="filter-option"><input type="checkbox" value="PL" data-text="🇵🇱 Польща" /><span>🇵🇱
+                Польща</span></label>
+            <label class="filter-option"><input type="checkbox" value="FR" data-text="🇫🇷 Франція" /><span>🇫🇷
+                Франція</span></label>
+            <label class="filter-option"><input type="checkbox" value="DE" data-text="🇩🇪 Німеччина" /><span>🇩🇪
+                Німеччина</span></label>
+            <label class="filter-option"><input type="checkbox" value="CA" data-text="🇨🇦 Канада" /><span>🇨🇦
+                Канада</span></label>
+            <label class="filter-option"><input type="checkbox" value="KR" data-text="🇰🇷 Південна Корея" /><span>🇰🇷
+                Південна Корея</span></label>
+            <label class="filter-option"><input type="checkbox" value="JP" data-text="🇯🇵 Японія" /><span>🇯🇵
+                Японія</span></label>
+            <label class="filter-option"><input type="checkbox" value="RU" data-text="🇷🇺 Росія" /><span>🇷🇺
+                Росія</span></label>
+          </div>
+        </div>
 
-        <select class="filter-select" id="lang-select" aria-label="Мова оригіналу">
-          <option value="">Усі мови</option>
-          <option value="uk">🇺🇦 Українська (мова)</option>
-          <option value="en">🇺🇸 Англійська</option>
-          <option value="pl">🇵🇱 Польська</option>
-          <option value="fr">🇫🇷 Французька</option>
-          <option value="de">🇩🇪 Німецька</option>
-          <option value="ko">🇰🇷 Корейська</option>
-          <option value="ja">🇯🇵 Японська</option>
-        </select>
+        <div class="multi-filter" data-filter="language">
+          <button type="button" class="filter-toggle-btn" id="lang-toggle">
+            <span class="filter-btn-label" data-default="Усі мови">Усі мови</span>
+            <span class="filter-arrow">▾</span>
+          </button>
+          <div class="filter-dropdown" id="lang-dropdown">
+            <label class="filter-option"><input type="checkbox" value="uk" data-text="🇺🇦 Українська" /><span>🇺🇦
+                Українська</span></label>
+            <label class="filter-option"><input type="checkbox" value="en" data-text="🇺🇸 Англійська" /><span>🇺🇸
+                Англійська</span></label>
+            <label class="filter-option"><input type="checkbox" value="pl" data-text="🇵🇱 Польська" /><span>🇵🇱
+                Польська</span></label>
+            <label class="filter-option"><input type="checkbox" value="fr" data-text="🇫🇷 Французька" /><span>🇫🇷
+                Французька</span></label>
+            <label class="filter-option"><input type="checkbox" value="de" data-text="🇩🇪 Німецька" /><span>🇩🇪
+                Німецька</span></label>
+            <label class="filter-option"><input type="checkbox" value="ko" data-text="🇰🇷 Корейська" /><span>🇰🇷
+                Корейська</span></label>
+            <label class="filter-option"><input type="checkbox" value="ja" data-text="🇯🇵 Японська" /><span>🇯🇵
+                Японська</span></label>
+            <label class="filter-option"><input type="checkbox" value="ru" data-text="🇷🇺 Російська" /><span>🇷🇺
+                Російська</span></label>
+          </div>
+        </div>
 
         <button type="button" class="reset-filters-btn" id="reset-filters-btn">
           Скинути фільтри
@@ -81,7 +120,7 @@
           <div class="player-placeholder">Завантаження плеєра...</div>
         </section>
 
-        <!-- Права колонка: Стрічка фільмів як у YouTube -->
+        <!-- Права колонка: Стрічка фільмів -->
         <aside class="sidebar-section">
           <h2 class="sidebar-title" id="sidebar-title">Популярні фільми</h2>
           <ul class="movie-list" id="movie-list"></ul>
@@ -115,7 +154,7 @@
           </div>
         </div>
 
-        <!-- Колонка 2: Контакти англійською -->
+        <!-- Колонка 2: Контакти -->
         <div class="footer-nav-col footer-contacts">
           <h3>Contact Us</h3>
           <ul class="contact-list">

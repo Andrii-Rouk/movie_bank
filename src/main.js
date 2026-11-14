@@ -5,17 +5,22 @@ import {
   searchMovies,
   fetchMovieTrailer,
   fetchMovieCredits,
+  fetchActorMovies,
 } from './api/tmdb-api.js';
 import { renderPlayer } from './js/render-player.js';
 import { renderSidebarList } from './js/render-sidebar.js';
-import { showError, showInfo } from './js/helpers.js';
+import {
+  showError,
+  showInfo,
+  getBackdropUrl,
+  getReleaseYear,
+} from './js/helpers.js';
 
 const refs = {
   searchForm: document.getElementById('search-form'),
-  genreSelect: document.getElementById('genre-select'),
-  yearSelect: document.getElementById('year-select'),
-  countrySelect: document.getElementById('country-select'),
-  langSelect: document.getElementById('lang-select'),
+  filtersBar: document.getElementById('filters-bar'),
+  genreDropdown: document.getElementById('genre-dropdown'),
+  yearDropdown: document.getElementById('year-dropdown'),
   resetFiltersBtn: document.getElementById('reset-filters-btn'),
   playerContainer: document.getElementById('player-container'),
   sidebarTitle: document.getElementById('sidebar-title'),
@@ -25,42 +30,93 @@ const refs = {
 
 const state = {
   movies: [],
+  actorMovies: [],
   activeMovie: null,
   activeTrailerKey: null,
   activeCast: [],
   playerMode: 'trailer',
   currentQuery: '',
-  genre: '',
-  year: '',
-  country: '',
-  language: '',
+  genres: [],
+  years: [],
+  countries: [],
+  languages: [],
   currentPage: 1,
   totalPages: 1,
 };
 
 function populateYears() {
   const currentYear = new Date().getFullYear();
-  let options = '<option value="">Усі роки</option>';
+  let html = '';
   for (let y = currentYear; y >= 1980; y -= 1) {
-    options += `<option value="${y}">${y}</option>`;
+    html += `
+      <label class="filter-option">
+        <input type="checkbox" value="${y}" data-text="${y}" />
+        <span>${y}</span>
+      </label>
+    `;
   }
-  refs.yearSelect.innerHTML = options;
+  refs.yearDropdown.innerHTML = html;
 }
 
 async function initFilters() {
   populateYears();
   try {
     const genres = await fetchGenres();
-    const options = genres
-      .map(
-        g =>
-          `<option value="${g.id}">${g.name[0].toUpperCase() + g.name.slice(1)}</option>`
-      )
+    const html = genres
+      .map(g => {
+        const title = g.name[0].toUpperCase() + g.name.slice(1);
+        return `
+          <label class="filter-option">
+            <input type="checkbox" value="${g.id}" data-text="${title}" />
+            <span>${title}</span>
+          </label>
+        `;
+      })
       .join('');
-    refs.genreSelect.insertAdjacentHTML('beforeend', options);
+    refs.genreDropdown.innerHTML = html;
   } catch (error) {
     console.error('Не вдалося завантажити жанри:', error);
   }
+}
+
+function closeAllDropdowns() {
+  document
+    .querySelectorAll('.multi-filter.is-open')
+    .forEach(el => el.classList.remove('is-open'));
+}
+
+function updateFilterButtonLabel(filterEl) {
+  const labelEl = filterEl.querySelector('.filter-btn-label');
+  const toggleBtn = filterEl.querySelector('.filter-toggle-btn');
+  const defaultText = labelEl.dataset.default;
+  const checked = Array.from(
+    filterEl.querySelectorAll('input[type="checkbox"]:checked')
+  );
+
+  if (checked.length === 0) {
+    labelEl.textContent = defaultText;
+    toggleBtn.classList.remove('has-selection');
+  } else if (checked.length === 1) {
+    labelEl.textContent = checked[0].dataset.text;
+    toggleBtn.classList.add('has-selection');
+  } else {
+    labelEl.textContent = `${checked[0].dataset.text} +${checked.length - 1}`;
+    toggleBtn.classList.add('has-selection');
+  }
+}
+
+function syncFiltersFromDOM() {
+  const getCheckedValues = filterName =>
+    Array.from(
+      refs.filtersBar.querySelectorAll(
+        `.multi-filter[data-filter="${filterName}"] input[type="checkbox"]:checked`
+      )
+    ).map(cb => cb.value);
+
+  state.genres = getCheckedValues('genre');
+  state.years = getCheckedValues('year');
+  state.countries = getCheckedValues('country');
+  state.languages = getCheckedValues('language');
 }
 
 async function selectMovie(movie) {
@@ -92,29 +148,127 @@ async function selectMovie(movie) {
   }
 }
 
+function closeActorModal() {
+  const existing = document.getElementById('actor-movies-modal');
+  if (existing) {
+    existing.remove();
+    document.body.style.overflow = '';
+  }
+}
+
+async function openActorModal(actorId, actorName) {
+  closeActorModal();
+
+  const modal = document.createElement('div');
+  modal.id = 'actor-movies-modal';
+  modal.className = 'actor-modal-backdrop';
+  modal.innerHTML = `
+    <div class="actor-modal-window" role="dialog" aria-modal="true">
+      <div class="actor-modal-header">
+        <h2 class="actor-modal-title">Фільмографія: ${actorName}</h2>
+        <button type="button" class="actor-modal-close" aria-label="Закрити">&times;</button>
+      </div>
+      <div class="actor-modal-body" id="actor-modal-body">
+        <div class="actor-modal-loading">Завантаження фільмів...</div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal || e.target.closest('.actor-modal-close')) {
+      closeActorModal();
+      return;
+    }
+
+    const movieCard = e.target.closest('.actor-movie-item');
+    if (movieCard) {
+      const movieId = Number(movieCard.dataset.movieId);
+      const chosen = state.actorMovies.find(m => m.id === movieId);
+      if (chosen) {
+        closeActorModal();
+        if (!state.movies.some(m => m.id === chosen.id)) {
+          state.movies = [chosen, ...state.movies];
+        }
+        selectMovie(chosen);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  });
+
+  try {
+    const movies = await fetchActorMovies(actorId);
+    state.actorMovies = movies;
+    const bodyEl = document.getElementById('actor-modal-body');
+    if (!bodyEl) return;
+
+    if (!movies || movies.length === 0) {
+      bodyEl.innerHTML =
+        '<div class="actor-modal-loading">Фільми за участю цього актора не знайдені.</div>';
+      return;
+    }
+
+    bodyEl.innerHTML = `
+      <ul class="actor-movies-grid">
+        ${movies
+          .map(m => {
+            const thumb = getBackdropUrl(m.poster_path || m.backdrop_path);
+            const year = getReleaseYear(m.release_date);
+            const rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
+            const role = m.character ? `Роль: ${m.character}` : '';
+
+            return `
+              <li class="actor-movie-item" data-movie-id="${m.id}">
+                <img src="${thumb}" alt="${m.title}" class="actor-movie-poster" loading="lazy" />
+                <div class="actor-movie-info">
+                  <h4 class="actor-movie-title">${m.title}</h4>
+                  <p class="actor-movie-meta">★ ${rating} • ${year}</p>
+                  ${role ? `<p class="actor-movie-role">${role}</p>` : ''}
+                </div>
+              </li>
+            `;
+          })
+          .join('')}
+      </ul>
+    `;
+  } catch (error) {
+    const bodyEl = document.getElementById('actor-modal-body');
+    if (bodyEl) {
+      bodyEl.innerHTML =
+        '<div class="actor-modal-loading">Помилка завантаження фільмографії.</div>';
+    }
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeActorModal();
+    closeAllDropdowns();
+  }
+});
+
+function getSelectedTexts(filterName) {
+  return Array.from(
+    refs.filtersBar.querySelectorAll(
+      `.multi-filter[data-filter="${filterName}"] input[type="checkbox"]:checked`
+    )
+  ).map(cb => cb.dataset.text);
+}
+
 function updateSidebarHeading() {
   if (state.currentQuery) {
     refs.sidebarTitle.textContent = `Результати: «${state.currentQuery}»`;
     return;
   }
 
-  const parts = [];
-  if (state.country) {
-    const countryText =
-      refs.countrySelect.options[refs.countrySelect.selectedIndex]?.text;
-    if (countryText) parts.push(countryText);
-  }
-  if (state.genre) {
-    const genreText =
-      refs.genreSelect.options[refs.genreSelect.selectedIndex]?.text;
-    if (genreText) parts.push(genreText);
-  }
-  if (state.year) parts.push(`${state.year} р.`);
-  if (state.language) {
-    const langText =
-      refs.langSelect.options[refs.langSelect.selectedIndex]?.text;
-    if (langText) parts.push(langText);
-  }
+  const parts = [
+    ...getSelectedTexts('country'),
+    ...getSelectedTexts('genre'),
+    ...getSelectedTexts('year').map(y => `${y} р.`),
+    ...getSelectedTexts('language'),
+  ];
 
   refs.sidebarTitle.textContent =
     parts.length > 0 ? parts.join(' • ') : 'Популярні фільми';
@@ -124,32 +278,42 @@ async function loadMovies(page = 1, append = false) {
   try {
     let data;
     const hasFilters = Boolean(
-      state.genre || state.year || state.country || state.language
+      state.genres.length ||
+      state.years.length ||
+      state.countries.length ||
+      state.languages.length
     );
 
     if (state.currentQuery) {
-      data = await searchMovies(state.currentQuery, page, state.year);
-      if (state.genre) {
+      data = await searchMovies(state.currentQuery, page, state.years);
+      if (state.genres.length > 0) {
+        const genreNums = state.genres.map(Number);
         data.results = data.results.filter(m =>
-          m.genre_ids?.includes(Number(state.genre))
+          genreNums.every(gId => m.genre_ids?.includes(gId))
         );
       }
-      if (state.country) {
-        data.results = data.results.filter(m =>
-          m.origin_country?.includes(state.country)
-        );
-      }
-      if (state.language) {
+      if (state.years.length > 1) {
         data.results = data.results.filter(
-          m => m.original_language === state.language
+          m =>
+            m.release_date && state.years.includes(m.release_date.slice(0, 4))
+        );
+      }
+      if (state.countries.length > 0) {
+        data.results = data.results.filter(m =>
+          m.origin_country?.some(c => state.countries.includes(c))
+        );
+      }
+      if (state.languages.length > 0) {
+        data.results = data.results.filter(m =>
+          state.languages.includes(m.original_language)
         );
       }
     } else if (hasFilters) {
       data = await discoverMovies({
-        genre: state.genre,
-        year: state.year,
-        country: state.country,
-        language: state.language,
+        genres: state.genres,
+        years: state.years,
+        countries: state.countries,
+        languages: state.languages,
         page,
       });
     } else {
@@ -193,6 +357,38 @@ async function loadMovies(page = 1, append = false) {
   }
 }
 
+// Відкриття/закриття випадаючих фільтрів
+refs.filtersBar.addEventListener('click', e => {
+  const toggleBtn = e.target.closest('.filter-toggle-btn');
+  if (!toggleBtn) return;
+
+  const parentFilter = toggleBtn.closest('.multi-filter');
+  const wasOpen = parentFilter.classList.contains('is-open');
+  closeAllDropdowns();
+  if (!wasOpen) {
+    parentFilter.classList.add('is-open');
+  }
+});
+
+// Закриття меню при кліку поза фільтрами
+document.addEventListener('click', e => {
+  if (!e.target.closest('.multi-filter')) {
+    closeAllDropdowns();
+  }
+});
+
+// Зміна чекбоксів у фільтрах
+refs.filtersBar.addEventListener('change', e => {
+  if (e.target.type !== 'checkbox') return;
+
+  const filterEl = e.target.closest('.multi-filter');
+  if (filterEl) {
+    updateFilterButtonLabel(filterEl);
+  }
+  syncFiltersFromDOM();
+  loadMovies(1, false);
+});
+
 // Пошук за назвою
 refs.searchForm.addEventListener('submit', e => {
   e.preventDefault();
@@ -207,36 +403,25 @@ refs.searchForm.addEventListener('submit', e => {
   loadMovies(1, false);
 });
 
-// Зміна фільтрів (Категорія, Рік, Країна, Мова)
-[
-  refs.genreSelect,
-  refs.yearSelect,
-  refs.countrySelect,
-  refs.langSelect,
-].forEach(select => {
-  select.addEventListener('change', () => {
-    state.genre = refs.genreSelect.value;
-    state.year = refs.yearSelect.value;
-    state.country = refs.countrySelect.value;
-    state.language = refs.langSelect.value;
-    loadMovies(1, false);
-  });
-});
-
 // Скидання всіх фільтрів і пошуку
 refs.resetFiltersBtn.addEventListener('click', () => {
   state.currentQuery = '';
-  state.genre = '';
-  state.year = '';
-  state.country = '';
-  state.language = '';
+  state.genres = [];
+  state.years = [];
+  state.countries = [];
+  state.languages = [];
 
   refs.searchForm.reset();
-  refs.genreSelect.value = '';
-  refs.yearSelect.value = '';
-  refs.countrySelect.value = '';
-  refs.langSelect.value = '';
+  refs.filtersBar
+    .querySelectorAll('input[type="checkbox"]:checked')
+    .forEach(cb => {
+      cb.checked = false;
+    });
+  refs.filtersBar
+    .querySelectorAll('.multi-filter')
+    .forEach(updateFilterButtonLabel);
 
+  closeAllDropdowns();
   loadMovies(1, false);
 });
 
@@ -254,8 +439,18 @@ refs.movieList.addEventListener('click', e => {
   }
 });
 
-// Перемикання режимів плеєра
+// Перемикання режимів плеєра та клік по актору
 refs.playerContainer.addEventListener('click', e => {
+  const actorCard = e.target.closest('.cast-card');
+  if (actorCard) {
+    const actorId = Number(actorCard.dataset.actorId);
+    const actorName = actorCard.dataset.actorName;
+    if (actorId) {
+      openActorModal(actorId, actorName);
+    }
+    return;
+  }
+
   const modeBtn = e.target.closest('.mode-btn');
   if (!modeBtn) return;
 
