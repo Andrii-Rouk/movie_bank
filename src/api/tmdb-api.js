@@ -13,7 +13,8 @@ const tmdbClient = axios.create({
 
 export async function fetchGenres() {
   const { data } = await tmdbClient.get('/genre/movie/list');
-  return data.genres || [];
+  const genres = data.genres || [];
+  return [...genres, { id: 'adult', name: '18+' }];
 }
 
 export async function fetchTrendingMovies(page = 1) {
@@ -30,14 +31,22 @@ export async function discoverMovies({
   languages = [],
   page = 1,
 }) {
+  const hasAdult = genres.includes('adult');
+  const regularGenres = genres.filter(id => id !== 'adult');
+
   const params = {
     page,
     sort_by: 'popularity.desc',
-    include_adult: false,
+    include_adult: hasAdult,
   };
 
-  if (genres.length > 0) {
-    params.with_genres = genres.join(',');
+  if (regularGenres.length > 0) {
+    params.with_genres = regularGenres.join(',');
+  }
+
+  if (hasAdult && regularGenres.length === 0) {
+    params.certification_country = 'US';
+    params['certification.gte'] = 'NC-17';
   }
 
   if (years.length === 1) {
@@ -69,14 +78,22 @@ export async function discoverMovies({
 }
 
 export async function searchMovies(query, page = 1, years = []) {
+  const yearMatch = query.trim().match(/\b(19\d{2}|20\d{2})\b$/);
+  const extractedYear = yearMatch ? yearMatch[1] : null;
+  const cleanQuery = extractedYear
+    ? query.replace(yearMatch[0], '').trim()
+    : query.trim();
+
   const params = {
-    query,
+    query: cleanQuery || query.trim(),
     page,
-    include_adult: false,
+    include_adult: true,
   };
 
   if (years.length === 1) {
     params.primary_release_year = years[0];
+  } else if (extractedYear) {
+    params.primary_release_year = extractedYear;
   }
 
   const { data } = await tmdbClient.get('/search/movie', { params });

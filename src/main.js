@@ -62,7 +62,11 @@ async function initFilters() {
   populateYears();
   try {
     const genres = await fetchGenres();
-    const html = genres
+    const allGenres = genres.some(g => g.id === 'adult')
+      ? genres
+      : [...genres, { id: 'adult', name: '18+' }];
+
+    const html = allGenres
       .map(g => {
         const title = g.name[0].toUpperCase() + g.name.slice(1);
         return `
@@ -287,10 +291,16 @@ async function loadMovies(page = 1, append = false) {
     if (state.currentQuery) {
       data = await searchMovies(state.currentQuery, page, state.years);
       if (state.genres.length > 0) {
-        const genreNums = state.genres.map(Number);
-        data.results = data.results.filter(m =>
-          genreNums.every(gId => m.genre_ids?.includes(gId))
-        );
+        const hasAdult = state.genres.includes('adult');
+        const genreNums = state.genres.filter(id => id !== 'adult').map(Number);
+
+        data.results = data.results.filter(m => {
+          const matchesGenres = genreNums.every(gId =>
+            m.genre_ids?.includes(gId)
+          );
+          const matchesAdult = !hasAdult || m.adult === true;
+          return matchesGenres && matchesAdult;
+        });
       }
       if (state.years.length > 1) {
         data.results = data.results.filter(
